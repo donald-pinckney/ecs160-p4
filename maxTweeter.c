@@ -99,6 +99,8 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 
 	while(fgets(line, 377, fp) != NULL)
 	{
+		line[strlen(line) - 1] = '\0';
+
 		validate(line, tweetIndex);
 
 		char *name = getName(line, nameIndex);
@@ -130,6 +132,8 @@ void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
     {
         invalid();
     }
+
+	buffer[strlen(buffer) - 1] = '\0';
     
     *nameIndex = findColumnIndex(buffer, 377, "\"name\"");
 	*tweetIndex = findColumnIndex(buffer, 377, "\"text\"");    
@@ -222,6 +226,12 @@ void counter(char **names, int numLines, struct info topInfo[numTop])
 		prev = curr;
 	}
 
+	currMin = calc_min(topInfo, &index);
+	if (currCount > currMin)
+	{
+		topInfo[index].name = prev;
+		topInfo[index].count = currCount;
+	}
 }
 
 void info_init(struct info *topInfo)
