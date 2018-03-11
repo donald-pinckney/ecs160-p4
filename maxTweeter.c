@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     FILE * file;
     file = fopen(filename, "r");
     
-	maxTweeter(filename); 
+	maxTweeter(file); 
 }
 
 int findColumn(FILE *fp)
