@@ -105,6 +105,11 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 		}
 		line[strlen(line) - 1] = '\0';
 
+		if(strlen(line) == 0)
+		{
+			invalid();
+		}
+
 		validate(line, tweetIndex);
 
 		char *name = getName(line, nameIndex);
@@ -138,6 +143,11 @@ void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
     }
 
 	buffer[strlen(buffer) - 1] = '\0';
+
+	if(strlen(buffer) == 0)
+	{
+		invalid();
+	}
     
     *nameIndex = findColumnIndex(buffer, 377, "\"name\"");
 	*tweetIndex = findColumnIndex(buffer, 377, "\"text\"");    
