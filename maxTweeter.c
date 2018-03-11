@@ -2,6 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define numTop 10
+
+struct info
+{
+	char *name;
+	int count;
+};
+
 void invalid();
 void maxTweeter(FILE *fp); 
 void validate(char line[377], int tweetIndex);
@@ -11,12 +19,20 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines);
 int findColumnIndex(char inBuffer[], int len, const char *toFind);
 char * findColumnAtIndex(char inBuffer[], int len, int index);
 int strcmp_sort(const void *lhs, const void *rhs);
+void info_init(struct info *topInfo);
+void counter(char **names, int numLines, struct info topInfo[numTop]);
+int calc_min(struct info topInfo[numTop], int *index);
 
 
 void invalid()
 {
 	printf("Invalid Input Format\n");
 	exit(1);
+}
+
+int info_sort(const void *lhs, const void *rhs)
+{
+	return ((const struct info *)rhs)->count - ((const struct info *)lhs)->count;
 }
 
 void maxTweeter(FILE *fp) 
@@ -32,11 +48,20 @@ void maxTweeter(FILE *fp)
 	int numLines;
 	char **sortedNames = getSortedNames(fp, nameIndex, tweetIndex, &numLines);
 
-	for(int i = 0; i < numLines; i++)
-	{
-		printf("%s\n", sortedNames[i]);
-	}
+	struct info topInfo[numTop];
 
+	counter(sortedNames, numLines, topInfo);
+
+	qsort(topInfo, numTop, sizeof(struct info), info_sort);
+
+	for(int i = 0; i < numTop; i++)
+	{
+		if(topInfo[i].name == NULL)
+		{
+			break;
+		}
+		printf("%s: %d\n", topInfo[i].name, topInfo[i].count);
+	}
 }
 
 void validate(char line[377], int tweetIndex)
@@ -89,6 +114,8 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 	free(nameRows);
 
 	qsort(actualNameRows, i, sizeof(char *), strcmp_sort);
+
+
 
 	return actualNameRows;
 }
@@ -163,6 +190,52 @@ char * findColumnAtIndex(char inBuffer[], int len, int index)
 	return tokenCopy;
 }
 
+void counter(char **names, int numLines, struct info topInfo[numTop])
+{
+	// struct info topInfo[numTop];
+	info_init(topInfo);
+	int i;
+	char *prev;
+	char *curr;
+	int currCount = 0;
+	int index, currMin;
+
+	prev = names[0];
+	for(i = 0; i < numLines; i++)
+	{
+		curr = names[i];
+		if (strcmp(prev, curr) != 0)
+		{
+			currMin = calc_min(topInfo, &index);
+			if (currCount > currMin)
+			{
+				topInfo[index].name = prev;
+				topInfo[index].count = currCount;
+			}
+			currCount = 1;
+		}
+		else
+		{
+			currCount++;
+		}
+
+		prev = curr;
+	}
+
+}
+
+void info_init(struct info *topInfo)
+{
+	int j;
+	
+	for (j = 0; j <numTop; j++)
+	{
+		topInfo[j].name = NULL;
+		topInfo[j].count = 0;
+
+	}
+}
+
 
 
 
@@ -181,5 +254,21 @@ int main(int argc, char *argv[])
 	maxTweeter(file); 
 }
 
+int calc_min(struct info topInfo[numTop], int *index)
+{
+	int  i = 0;
+	int currMin = topInfo[0].count;
+	*index = i;
 
+	for (i = 0; i < numTop; i++)
+	{
+		if (topInfo[i].count < currMin)
+		{
+			currMin = topInfo[i].count;
+			*index = i;
+		}
+	}
+
+	return currMin;
+}
 
