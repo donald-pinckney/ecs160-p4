@@ -1,3 +1,6 @@
+afl/out/
+maxTweeter
+
 # Prerequisites
 *.d
 
