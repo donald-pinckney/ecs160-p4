@@ -94,15 +94,21 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 	char **nameRows = malloc(20000 * sizeof(char *));
 	memset(nameRows, 0, sizeof(char *) * 20000);
 
-	char line[377];
+	char line[378];
 	int i = 0;
 
-	while(fgets(line, 377, fp) != NULL)
+	while(fgets(line, 378, fp) != NULL)
 	{
 		if(line[0] == '\n')
 		{
 			invalid();
 		}
+
+		if(strlen(line) == 377)
+		{
+			invalid();
+		}
+
 		line[strlen(line) - 1] = '\0';
 
 		if(strlen(line) == 0)
@@ -135,12 +141,17 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 
 void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
 {
-    char buffer[377], *token;
+    char buffer[378], *token;
     
     if (fgets(buffer , 377, fp) == NULL)
     {
         invalid();
     }
+
+	if(strlen(buffer) == 377)
+	{
+		invalid();
+	}
 
 	buffer[strlen(buffer) - 1] = '\0';
 
