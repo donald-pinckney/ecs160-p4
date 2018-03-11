@@ -8,8 +8,8 @@ void validate(char line[377], int tweetIndex);
 char * getName(char line[377], int nameIndex);
 void findColumns(FILE *fp, int *nameIndex, int *tweetIndex);
 char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines);
-int findColumnIndex(char buffer[], const char *toFind);
-char * findColumnAtIndex(char buffer[], int index); 
+int findColumnIndex(char inBuffer[], int len, const char *toFind);
+char * findColumnAtIndex(char inBuffer[], int len, int index);
 int strcmp_sort(const void *lhs, const void *rhs);
 
 
@@ -32,11 +32,16 @@ void maxTweeter(FILE *fp)
 	int numLines;
 	char **sortedNames = getSortedNames(fp, nameIndex, tweetIndex, &numLines);
 
+	for(int i = 0; i < numLines; i++)
+	{
+		printf("%s\n", sortedNames[i]);
+	}
+
 }
 
 void validate(char line[377], int tweetIndex)
 {
-	char *tweet = findColumnAtIndex(line, tweetIndex);
+	char *tweet = findColumnAtIndex(line, 377, tweetIndex);
 	char c;
 	while((c = *tweet) != '\0')
 	{
@@ -50,13 +55,13 @@ void validate(char line[377], int tweetIndex)
 
 char * getName(char line[377], int nameIndex)
 {
-	return findColumnAtIndex(line, nameIndex);
+	return findColumnAtIndex(line, 377, nameIndex);
 }
 
 
 int strcmp_sort(const void *lhs, const void *rhs)
 {
-	return strcmp((const char *)lhs, (const char *)rhs);
+	return strcmp(*(const char **)lhs, *(const char **)rhs);
 }
 
 char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
@@ -99,12 +104,15 @@ void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
         invalid();
     }
     
-    *nameIndex = findColumnIndex(buffer, "\"name\"");
-	*tweetIndex = findColumnIndex(buffer, "\"text\"");    
+    *nameIndex = findColumnIndex(buffer, 377, "\"name\"");
+	*tweetIndex = findColumnIndex(buffer, 377, "\"text\"");    
 }
 
-int findColumnIndex(char buffer[], const char *toFind) 
+int findColumnIndex(char inBuffer[], int len, const char *toFind) 
 {
+	char *buffer = malloc(sizeof(char) * len);
+	memcpy(buffer, inBuffer, sizeof(char) * len);
+
     char *token = strtok(buffer, ",");
     int i = 0;
 
@@ -112,6 +120,7 @@ int findColumnIndex(char buffer[], const char *toFind)
     {
         if (strcmp(token, toFind) == 0)
         {
+			free(buffer);
             return i;
         }
         
@@ -119,15 +128,22 @@ int findColumnIndex(char buffer[], const char *toFind)
         i++;
     }
     
+	free(buffer);
     return -1;
 }
 
-char * findColumnAtIndex(char buffer[], int index) 
+char * findColumnAtIndex(char inBuffer[], int len, int index) 
 {
+	char *buffer = malloc(sizeof(char) * len);
+	memcpy(buffer, inBuffer, sizeof(char) * len);
+
 	char *token = strtok(buffer, ",");
 	if(index == 0)
 	{
-		return token;
+		char *tokenCopy = malloc(sizeof(char) * (strlen(token) + 1));
+		strcpy(tokenCopy, token);
+		free(buffer);
+		return tokenCopy;
 	}
 
 	int i;
@@ -140,7 +156,11 @@ char * findColumnAtIndex(char buffer[], int index)
 		}
 	}
 	
-	return token;
+	char *tokenCopy = malloc(sizeof(char) * (strlen(token) + 1));
+	strcpy(tokenCopy, token);
+	free(buffer);
+
+	return tokenCopy;
 }
 
 
