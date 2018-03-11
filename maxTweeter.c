@@ -99,6 +99,10 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 
 	while(fgets(line, 377, fp) != NULL)
 	{
+		if(line[0] == '\n')
+		{
+			invalid();
+		}
 		line[strlen(line) - 1] = '\0';
 
 		validate(line, tweetIndex);
