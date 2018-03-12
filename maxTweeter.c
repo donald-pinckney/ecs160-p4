@@ -147,7 +147,9 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 			invalid();
 		}
 
-		line[strlen(line) - 1] = '\0';
+		if(line[strlen(line) - 1] == '\n') {
+			line[strlen(line) - 1] = '\0';
+		}
 
 		if(strlen(line) == 0)
 		{
@@ -200,7 +202,9 @@ void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
 		invalid();
 	}
 
-	buffer[strlen(buffer) - 1] = '\0';
+	if(buffer[strlen(buffer) - 1] == '\n') {
+		buffer[strlen(buffer) - 1] = '\0';
+	}
 
 	if(strlen(buffer) == 0)
 	{
@@ -222,6 +226,7 @@ int findColumnIndex(char inBuffer[], int len, const char *toFind)
 	memcpy(buffer, inBuffer, sizeof(char) * len);
 
     char *token = strtok(buffer, ",");
+
     int i = 0;
 
     while (token != NULL)
@@ -250,6 +255,11 @@ char * findColumnAtIndex(char inBuffer[], int len, int index)
 	memcpy(buffer, inBuffer, sizeof(char) * len);
 
 	char *token = strtok(buffer, ",");
+	if(token == NULL)
+	{
+		invalid();
+	}
+
 	if(index == 0)
 	{
 		char *tokenCopy = malloc(sizeof(char) * (strlen(token) + 1));
