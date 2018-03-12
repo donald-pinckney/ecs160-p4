@@ -1,8 +1,20 @@
+
+/*
+* ECS 160 Winter 2018 Homework 4
+* Authors : Donald Pinckney, Megha Jain
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#define numTop 10
+#define numTop 10 //The top n tweeters to get.
+
+/*
+* This struct holds the information required to keep track of current top 
+* ten tweeters -- name of the tweeter and thier tweet count. 
+*/
+
 
 struct info
 {
@@ -10,6 +22,9 @@ struct info
 	int count;
 };
 
+/*
+* Function prototypes, because yay modularity!
+*/
 void invalid();
 void maxTweeter(FILE *fp); 
 void validate(char line[377], int tweetIndex);
@@ -24,17 +39,28 @@ void counter(char **names, int numLines, struct info topInfo[numTop]);
 int calc_min(struct info topInfo[numTop], int *index);
 
 
+
+/*
+* Error handler function for when we encounter invalid inputs. 
+*/
 void invalid()
 {
 	printf("Invalid Input Format\n");
 	exit(1);
 }
 
+/*
+* Sort function passed as parameter to qsort in order to sort the top ten in descending order.
+*/
 int info_sort(const void *lhs, const void *rhs)
 {
 	return ((const struct info *)rhs)->count - ((const struct info *)lhs)->count;
 }
 
+/*
+* This functions is the controller called after main that controls the execution flow of the program.
+* After processing, given no invalid input cases, it prints the top ten tweeters. 
+*/
 void maxTweeter(FILE *fp) 
 {
     int nameIndex, tweetIndex;
@@ -64,6 +90,7 @@ void maxTweeter(FILE *fp)
 	}
 }
 
+
 void validate(char line[377], int tweetIndex)
 {
 	char *tweet = findColumnAtIndex(line, 377, tweetIndex);
@@ -78,17 +105,28 @@ void validate(char line[377], int tweetIndex)
 	}
 }
 
+/*
+* This function gets the name of the tweeter in the current line.
+*/
 char * getName(char line[377], int nameIndex)
 {
 	return findColumnAtIndex(line, 377, nameIndex);
 }
 
 
+/*
+* The sort function a parameter to qsort for sorting names alphabetically.
+*/
 int strcmp_sort(const void *lhs, const void *rhs)
 {
 	return strcmp(*(const char **)lhs, *(const char **)rhs);
 }
 
+/*
+* This function returns an alphabetically sorted array of the names of all the tweeters.
+* Note that this function keeps the redundant entries for each tweeter because that is
+* used later to compute tweet count for every tweeter.  
+*/
 char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 {
 	char **nameRows = malloc(20000 * sizeof(char *));
@@ -122,6 +160,11 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 
 		nameRows[i] = name;
 		i++;
+
+		if(i == 20000)
+		{
+			invalid();
+		}
 	}
 
 	*numLines = i;
@@ -138,7 +181,11 @@ char ** getSortedNames(FILE *fp, int nameIndex, int tweetIndex, int *numLines)
 }
 
 
-
+/*
+* This function finds the indices for the name and text columns respectively. 
+* If they aren't found, then nameIndex and tweetIndex will be set to -1 which 
+* is then handled by the invocating method. 
+*/
 void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
 {
     char buffer[378], *token;
@@ -164,6 +211,11 @@ void findColumns(FILE *fp, int *nameIndex, int *tweetIndex)
 	*tweetIndex = findColumnIndex(buffer, 377, "\"text\"");    
 }
 
+
+
+/*
+* This functions find the index for the column of a given name. 
+*/
 int findColumnIndex(char inBuffer[], int len, const char *toFind) 
 {
 	char *buffer = malloc(sizeof(char) * len);
@@ -188,6 +240,10 @@ int findColumnIndex(char inBuffer[], int len, const char *toFind)
     return -1;
 }
 
+
+/*
+* This functions extracts the field at a given column index and returns it. 
+*/
 char * findColumnAtIndex(char inBuffer[], int len, int index) 
 {
 	char *buffer = malloc(sizeof(char) * len);
@@ -219,6 +275,14 @@ char * findColumnAtIndex(char inBuffer[], int len, int index)
 	return tokenCopy;
 }
 
+
+/*
+* This function is the central function that computes that top ten tweeters. 
+* It does so by keeping track of the current top ten ones whilst traversing the 
+* loop of sorted (redundant) names and checking on computing count for a 
+* new tweeter is greater than the the current minimum count. If yes, it swaps
+* the new tweeter and its count with the old minimum.
+*/
 void counter(char **names, int numLines, struct info topInfo[numTop])
 {
 	// struct info topInfo[numTop];
@@ -259,6 +323,10 @@ void counter(char **names, int numLines, struct info topInfo[numTop])
 	}
 }
 
+
+/*
+* Initialises the struct array that holds information about the top ten tweeters. 
+*/
 void info_init(struct info *topInfo)
 {
 	int j;
@@ -273,7 +341,10 @@ void info_init(struct info *topInfo)
 
 
 
-
+/*
+* Main function, opens file of name passed as command line argument and calls the rest of 
+* the necessary functions. 
+*/
 int main(int argc, char *argv[]) 
 {
 	if(argc != 2) 
@@ -285,6 +356,11 @@ int main(int argc, char *argv[])
 
     FILE * file;
     file = fopen(filename, "r");
+	if (file == NULL)
+	{
+		perror("Could not find file");
+		exit(1);
+	}
     
 	maxTweeter(file); 
 }
